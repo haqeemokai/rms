@@ -44,7 +44,7 @@ public class MenuService {
     }
 
     public Optional<MenuItem> getMenuItemById(String id) {
-        return menuItemRepository.findById(id); // Assuming you have a `MenuRepository` that extends MongoRepository
+        return menuItemRepository.findById(id);
     }
 
 
