@@ -3,10 +3,10 @@ package com.example.rms.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "customers") // Maps to the "customers" collection in MongoDB
+@Document(collection = "customers")
 public class Customer {
     @Id
-    private String id;
+    private String id; // Custom ID
     private String name;
     private String email;
     private String phone;
@@ -58,7 +58,7 @@ public class Customer {
         return '\n' + "Customer - " + "id= " + id + '\n' +
                 "Name - " + name + '\n' +
                 "Email - " + email + '\n' +
-                "Phone No - " + phone + '\n' +
+                "Phone - " + phone + '\n' +
                 "Address - " + address + '\n';
     }
 }

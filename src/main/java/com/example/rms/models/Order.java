@@ -6,13 +6,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collection = "orders") // Maps to the "orders" collection in MongoDB
+@Document(collection = "orders")
 public class Order {
     @Id
-    private String id;
+    private String id; // Custom ID
     private String customerId;
     private List<OrderItem> items;
-    private String status; // e.g., "PENDING", "COMPLETED"
+    private String status;
     private LocalDateTime createdAt;
 
     // Getters and Setters
@@ -59,9 +59,9 @@ public class Order {
     @Override
     public String toString() {
         return '\n' + "Order - " + "id= " + id + '\n' +
-                "Customer ID - " + customerId + '\n' +
-                "Items - " + items + '\n' +
+                "CustomerId - " + customerId + '\n' +
                 "Status - " + status + '\n' +
-                "Created at - " + createdAt + '\n';
+                "CreatedAt - " + createdAt + '\n' +
+                "Items - " + items + '\n';
     }
 }

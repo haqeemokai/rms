@@ -15,6 +15,9 @@ public class CustomerService {
 
     // Register a new customer
     public Customer registerCustomer(Customer customer) {
+        if (customerRepository.existsById(customer.getId())) {
+            throw new IllegalArgumentException("Customer ID already exists.");
+        }
         return customerRepository.save(customer);
     }
 

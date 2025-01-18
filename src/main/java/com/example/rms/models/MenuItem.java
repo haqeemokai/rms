@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "menuItems")
 public class MenuItem {
     @Id
-    private String id;
+    private String id; // Custom ID
     private String name;
     private String description;
     private double price;

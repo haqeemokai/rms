@@ -4,17 +4,17 @@ import com.example.rms.models.Customer;
 import com.example.rms.models.MenuItem;
 import com.example.rms.models.Order;
 import com.example.rms.models.OrderItem;
-import java.util.ArrayList;
-import java.util.List;
+import com.example.rms.models.User;
 import com.example.rms.services.CustomerService;
 import com.example.rms.services.MenuService;
 import com.example.rms.services.OrderService;
 import com.example.rms.services.UserService;
-import com.example.rms.models.User;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -34,7 +34,7 @@ public class RMSMenu {
     private static void runMenu(UserService userService, CustomerService customerService, MenuService menuService, OrderService orderService) {
         Scanner scanner = new Scanner(System.in);
 
-        // Handle authentication
+        // Authentication process
         if (!authenticateUser(scanner, userService)) {
             System.out.println("Exiting the system...");
             return;
@@ -127,11 +127,11 @@ public class RMSMenu {
         }
     }
 
-    private static void manageOrders(Scanner scanner, OrderService orderService) {
-        System.out.println("=== Manage Orders ===");
-        System.out.println("1. Create Order");
-        System.out.println("2. Update Order Status");
-        System.out.println("3. View Order History");
+    private static void manageCustomers(Scanner scanner, CustomerService customerService) {
+        System.out.println("=== Manage Customers ===");
+        System.out.println("1. Register New Customer");
+        System.out.println("2. Update Customer Info");
+        System.out.println("3. View Customers");
         System.out.println("4. Go Back");
         System.out.print("Enter your choice: ");
 
@@ -140,28 +140,65 @@ public class RMSMenu {
 
         switch (choice) {
             case 1:
-                createOrder(scanner, orderService);
+                System.out.print("Enter customer ID: ");
+                String id = scanner.nextLine();
+                System.out.print("Enter customer name: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter customer email: ");
+                String email = scanner.nextLine();
+                System.out.print("Enter customer phone: ");
+                String phone = scanner.nextLine();
+                System.out.print("Enter customer address: ");
+                String address = scanner.nextLine();
+
+                Customer newCustomer = new Customer();
+                newCustomer.setId(id);
+                newCustomer.setName(name);
+                newCustomer.setEmail(email);
+                newCustomer.setPhone(phone);
+                newCustomer.setAddress(address);
+
+                try {
+                    customerService.registerCustomer(newCustomer);
+                    System.out.println("Customer registered successfully!");
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
                 break;
 
             case 2:
-                System.out.print("Enter order ID: ");
-                String orderId = scanner.nextLine();
-                System.out.print("Enter new status (e.g., PENDING, COMPLETED): ");
-                String status = scanner.nextLine();
+                System.out.print("Enter customer ID to update: ");
+                String updateId = scanner.nextLine();
+                Optional<Customer> existingCustomer = customerService.findCustomerById(updateId);
+                if (existingCustomer.isPresent()) {
+                    Customer customerToUpdate = existingCustomer.get();
 
-                Optional<Order> updatedOrder = orderService.updateOrderStatus(orderId, status);
-                if (updatedOrder.isPresent()) {
-                    System.out.println("Order status updated successfully!");
+                    System.out.print("Enter new name (or press Enter to keep current): ");
+                    String updatedName = scanner.nextLine();
+                    if (!updatedName.isEmpty()) customerToUpdate.setName(updatedName);
+
+                    System.out.print("Enter new email (or press Enter to keep current): ");
+                    String updatedEmail = scanner.nextLine();
+                    if (!updatedEmail.isEmpty()) customerToUpdate.setEmail(updatedEmail);
+
+                    System.out.print("Enter new phone (or press Enter to keep current): ");
+                    String updatedPhone = scanner.nextLine();
+                    if (!updatedPhone.isEmpty()) customerToUpdate.setPhone(updatedPhone);
+
+                    System.out.print("Enter new address (or press Enter to keep current): ");
+                    String updatedAddress = scanner.nextLine();
+                    if (!updatedAddress.isEmpty()) customerToUpdate.setAddress(updatedAddress);
+
+                    customerService.updateCustomer(updateId, customerToUpdate);
+                    System.out.println("Customer information updated successfully!");
                 } else {
-                    System.out.println("Order not found. Please try again.");
+                    System.out.println("Customer not found.");
                 }
                 break;
 
             case 3:
-                System.out.print("Enter customer ID: ");
-                String customerId = scanner.nextLine();
-                System.out.println("Order history for customer:");
-                orderService.getOrderHistory(customerId).forEach(System.out::println);
+                System.out.println("Viewing all customers:");
+                customerService.getAllCustomers().forEach(System.out::println);
                 break;
 
             case 4:
@@ -173,99 +210,12 @@ public class RMSMenu {
         }
     }
 
-    private static void createOrder(Scanner scanner, OrderService orderService) {
-        System.out.print("Enter customer ID: ");
-        String customerId = scanner.nextLine();
-
-        System.out.println("Enter order items:");
-        boolean addingItems = true;
-        List<OrderItem> items = new ArrayList<>();
-
-        while (addingItems) {
-            System.out.print("Enter menu item ID: ");
-            String menuItemId = scanner.nextLine();
-            System.out.print("Enter menu item name: ");
-            String menuItemName = scanner.nextLine();
-            System.out.print("Enter quantity: ");
-            int quantity = scanner.nextInt();
-            System.out.print("Enter price: ");
-            double price = scanner.nextDouble();
-            scanner.nextLine(); // Consume newline character
-
-            OrderItem orderItem = new OrderItem();
-            orderItem.setMenuItemId(menuItemId);
-            orderItem.setName(menuItemName);
-            orderItem.setQuantity(quantity);
-            orderItem.setPrice(price);
-
-            items.add(orderItem);
-
-            System.out.print("Do you want to add another item? (yes/no): ");
-            String response = scanner.nextLine().toLowerCase();
-            addingItems = response.equals("yes");
-        }
-
-        // Create the order
-        Order newOrder = new Order();
-        newOrder.setCustomerId(customerId);
-        newOrder.setItems(items);
-
-        // Save the order
-        Order savedOrder = orderService.createOrder(newOrder);
-        System.out.println("Order created successfully! Order ID: " + savedOrder.getId());
-    }
-
-
-    private static void manageCustomers(Scanner scanner, CustomerService customerService) {
-        System.out.println("=== Manage Customers ===");
-        System.out.println("1. Register New Customer");
-        System.out.println("2. View Customers");
-        System.out.println("3. Go Back");
-        System.out.print("Enter your choice: ");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline character
-
-        switch (choice) {
-            case 1:
-                System.out.print("Enter customer name: ");
-                String name = scanner.nextLine();
-                System.out.print("Enter customer email: ");
-                String email = scanner.nextLine();
-                System.out.print("Enter customer phone: ");
-                String phone = scanner.nextLine();
-                System.out.print("Enter customer address: ");
-                String address = scanner.nextLine();
-
-                Customer newCustomer = new Customer();
-                newCustomer.setName(name);
-                newCustomer.setEmail(email);
-                newCustomer.setPhone(phone);
-                newCustomer.setAddress(address);
-
-                customerService.registerCustomer(newCustomer);
-                System.out.println("Customer registered successfully!");
-                break;
-
-            case 2:
-                System.out.println("Viewing all customers:");
-                customerService.getAllCustomers().forEach(System.out::println);
-                break;
-
-            case 3:
-                System.out.println("Returning to main menu...");
-                break;
-
-            default:
-                System.out.println("Invalid choice. Returning to main menu...");
-        }
-    }
-
     private static void manageMenuItems(Scanner scanner, MenuService menuService) {
         System.out.println("=== Manage Menu Items ===");
         System.out.println("1. Add Menu Item");
-        System.out.println("2. View Menu Items");
-        System.out.println("3. Go Back");
+        System.out.println("2. Update Menu Item");
+        System.out.println("3. View Menu Items");
+        System.out.println("4. Go Back");
         System.out.print("Enter your choice: ");
 
         int choice = scanner.nextInt();
@@ -273,35 +223,161 @@ public class RMSMenu {
 
         switch (choice) {
             case 1:
+                System.out.print("Enter menu item ID: ");
+                String id = scanner.nextLine();
                 System.out.print("Enter menu item name: ");
-                String itemName = scanner.nextLine();
+                String name = scanner.nextLine();
                 System.out.print("Enter menu item description: ");
-                String itemDescription = scanner.nextLine();
+                String description = scanner.nextLine();
                 System.out.print("Enter menu item price: ");
                 double price = scanner.nextDouble();
-                scanner.nextLine(); // Consume newline character
+                scanner.nextLine();
+                System.out.print("Is the menu item available (true/false): ");
+                boolean available = scanner.nextBoolean();
+                scanner.nextLine();
 
-                MenuItem menuItem = new MenuItem();
-                menuItem.setName(itemName);
-                menuItem.setDescription(itemDescription);
-                menuItem.setPrice(price);
-                menuItem.setAvailable(true);
+                MenuItem newMenuItem = new MenuItem();
+                newMenuItem.setId(id);
+                newMenuItem.setName(name);
+                newMenuItem.setDescription(description);
+                newMenuItem.setPrice(price);
+                newMenuItem.setAvailable(available);
 
-                menuService.addMenuItem(menuItem);
-                System.out.println("Menu item added successfully!");
+                try {
+                    menuService.addMenuItem(newMenuItem);
+                    System.out.println("Menu item added successfully!");
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
                 break;
 
             case 2:
+                System.out.print("Enter menu item ID to update: ");
+                String updateMenuId = scanner.nextLine();
+                Optional<MenuItem> existingMenuItem = menuService.getMenuItemById(updateMenuId);
+                if (existingMenuItem.isPresent()) {
+                    MenuItem menuItemToUpdate = existingMenuItem.get();
+
+                    System.out.print("Enter new name (or press Enter to keep current): ");
+                    String updatedName = scanner.nextLine();
+                    if (!updatedName.isEmpty()) menuItemToUpdate.setName(updatedName);
+
+                    System.out.print("Enter new description (or press Enter to keep current): ");
+                    String updatedDescription = scanner.nextLine();
+                    if (!updatedDescription.isEmpty()) menuItemToUpdate.setDescription(updatedDescription);
+
+                    System.out.print("Enter new price (or press Enter to keep current): ");
+                    String priceInput = scanner.nextLine();
+                    if (!priceInput.isEmpty()) menuItemToUpdate.setPrice(Double.parseDouble(priceInput));
+
+                    System.out.print("Is the menu item available (true/false) (or press Enter to keep current): ");
+                    String availableInput = scanner.nextLine();
+                    if (!availableInput.isEmpty()) menuItemToUpdate.setAvailable(Boolean.parseBoolean(availableInput));
+
+                    menuService.updateMenuItem(updateMenuId, menuItemToUpdate);
+                    System.out.println("Menu item updated successfully!");
+                } else {
+                    System.out.println("Menu item not found.");
+                }
+                break;
+
+            case 3:
                 System.out.println("Viewing all menu items:");
                 menuService.getAllMenuItems().forEach(System.out::println);
                 break;
 
-            case 3:
+            case 4:
                 System.out.println("Returning to main menu...");
                 break;
 
             default:
                 System.out.println("Invalid choice. Returning to main menu...");
+        }
+    }
+
+    private static void manageOrders(Scanner scanner, OrderService orderService) {
+        System.out.println("=== Manage Orders ===");
+        System.out.println("1. Create Order");
+        System.out.println("2. Update Order Status");
+        System.out.println("3. View Order History");
+        System.out.println("4. Go Back");
+        System.out.print("Enter your choice: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                System.out.print("Enter order ID: ");
+                String orderId = scanner.nextLine();
+                System.out.print("Enter customer ID: ");
+                String customerId = scanner.nextLine();
+
+                List<OrderItem> items = new ArrayList<>();
+                boolean addingItems = true;
+
+                while (addingItems) {
+                    System.out.print("Enter menu item ID: ");
+                    String menuItemId = scanner.nextLine();
+                    System.out.print("Enter menu item name: ");
+                    String menuItemName = scanner.nextLine();
+                    System.out.print("Enter quantity: ");
+                    int quantity = scanner.nextInt();
+                    System.out.print("Enter price: ");
+                    double price = scanner.nextDouble();
+                    scanner.nextLine();
+
+                    OrderItem item = new OrderItem();
+                    item.setMenuItemId(menuItemId);
+                    item.setName(menuItemName);
+                    item.setQuantity(quantity);
+                    item.setPrice(price);
+
+                    items.add(item);
+
+                    System.out.print("Add another item? (yes/no): ");
+                    addingItems = scanner.nextLine().equalsIgnoreCase("yes");
+                }
+
+                Order newOrder = new Order();
+                newOrder.setId(orderId);
+                newOrder.setCustomerId(customerId);
+                newOrder.setItems(items);
+
+                try {
+                    orderService.createOrder(newOrder);
+                    System.out.println("Order created successfully!");
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+                break;
+
+            case 2:
+                System.out.print("Enter order ID: ");
+                String updateOrderId = scanner.nextLine();
+                System.out.print("Enter new status: ");
+                String status = scanner.nextLine();
+
+                Optional<Order> updatedOrder = orderService.updateOrderStatus(updateOrderId, status);
+                if (updatedOrder.isPresent()) {
+                    System.out.println("Order updated successfully!");
+                } else {
+                    System.out.println("Order not found.");
+                }
+                break;
+
+            case 3:
+                System.out.print("Enter customer ID: ");
+                String customerForHistory = scanner.nextLine();
+                orderService.getOrderHistory(customerForHistory).forEach(System.out::println);
+                break;
+
+            case 4:
+                System.out.println("Returning to main menu...");
+                break;
+
+            default:
+                System.out.println("Invalid choice.");
         }
     }
 }

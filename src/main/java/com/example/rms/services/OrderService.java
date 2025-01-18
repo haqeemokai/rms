@@ -16,6 +16,9 @@ public class OrderService {
 
     // Create a new order
     public Order createOrder(Order order) {
+        if (orderRepository.existsById(order.getId())) {
+            throw new IllegalArgumentException("Order ID already exists.");
+        }
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus("PENDING"); // Default status
         return orderRepository.save(order);
