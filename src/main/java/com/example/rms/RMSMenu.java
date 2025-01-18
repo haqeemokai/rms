@@ -3,6 +3,9 @@ package com.example.rms;
 import com.example.rms.models.Customer;
 import com.example.rms.models.MenuItem;
 import com.example.rms.models.Order;
+import com.example.rms.models.OrderItem;
+import java.util.ArrayList;
+import java.util.List;
 import com.example.rms.services.CustomerService;
 import com.example.rms.services.MenuService;
 import com.example.rms.services.OrderService;
@@ -137,8 +140,7 @@ public class RMSMenu {
 
         switch (choice) {
             case 1:
-                System.out.println("Creating a new order...");
-                // Simplified for brevity; you can add input for customer ID and items
+                createOrder(scanner, orderService);
                 break;
 
             case 2:
@@ -170,6 +172,49 @@ public class RMSMenu {
                 System.out.println("Invalid choice. Returning to main menu...");
         }
     }
+
+    private static void createOrder(Scanner scanner, OrderService orderService) {
+        System.out.print("Enter customer ID: ");
+        String customerId = scanner.nextLine();
+
+        System.out.println("Enter order items:");
+        boolean addingItems = true;
+        List<OrderItem> items = new ArrayList<>();
+
+        while (addingItems) {
+            System.out.print("Enter menu item ID: ");
+            String menuItemId = scanner.nextLine();
+            System.out.print("Enter menu item name: ");
+            String menuItemName = scanner.nextLine();
+            System.out.print("Enter quantity: ");
+            int quantity = scanner.nextInt();
+            System.out.print("Enter price: ");
+            double price = scanner.nextDouble();
+            scanner.nextLine(); // Consume newline character
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setMenuItemId(menuItemId);
+            orderItem.setName(menuItemName);
+            orderItem.setQuantity(quantity);
+            orderItem.setPrice(price);
+
+            items.add(orderItem);
+
+            System.out.print("Do you want to add another item? (yes/no): ");
+            String response = scanner.nextLine().toLowerCase();
+            addingItems = response.equals("yes");
+        }
+
+        // Create the order
+        Order newOrder = new Order();
+        newOrder.setCustomerId(customerId);
+        newOrder.setItems(items);
+
+        // Save the order
+        Order savedOrder = orderService.createOrder(newOrder);
+        System.out.println("Order created successfully! Order ID: " + savedOrder.getId());
+    }
+
 
     private static void manageCustomers(Scanner scanner, CustomerService customerService) {
         System.out.println("=== Manage Customers ===");
