@@ -3,7 +3,7 @@ package com.example.rms.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "menuItems") // Maps to the "menuItems" collection in MongoDB
+@Document(collection = "menuItems")
 public class MenuItem {
     @Id
     private String id;
@@ -51,5 +51,14 @@ public class MenuItem {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    @Override
+    public String toString() {
+        return '\n' + "MenuItem - " + "id= " + id + '\n' +
+                "Name - " + name + '\n' +
+                "Description - " + description + '\n' +
+                "Price - " + price + '\n' +
+                "Available - " + available + '\n';
     }
 }

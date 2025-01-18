@@ -38,4 +38,13 @@ public class OrderItem {
     public void setPrice(double price) {
         this.price = price;
     }
+
+    // Override toString to display detailed multi-line format
+    @Override
+    public String toString() {
+        return '\n' + "OrderItem - " + "menuItemId= " + menuItemId + '\n' +
+                "Name - " + name + '\n' +
+                "Quantity - " + quantity + '\n' +
+                "Price - " + price + '\n';
+    }
 }

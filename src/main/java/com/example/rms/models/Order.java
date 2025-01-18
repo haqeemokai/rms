@@ -55,4 +55,13 @@ public class Order {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    @Override
+    public String toString() {
+        return '\n' + "Order - " + "id= " + id + '\n' +
+                "Customer ID - " + customerId + '\n' +
+                "Items - " + items + '\n' +
+                "Status - " + status + '\n' +
+                "Created at - " + createdAt + '\n';
+    }
 }

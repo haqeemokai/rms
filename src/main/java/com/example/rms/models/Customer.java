@@ -52,4 +52,13 @@ public class Customer {
     public void setAddress(String address) {
         this.address = address;
     }
+
+    @Override
+    public String toString() {
+        return '\n' + "Customer - " + "id= " + id + '\n' +
+                "Name - " + name + '\n' +
+                "Email - " + email + '\n' +
+                "Phone No - " + phone + '\n' +
+                "Address - " + address + '\n';
+    }
 }
